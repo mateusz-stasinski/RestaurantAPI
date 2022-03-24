@@ -49,6 +49,10 @@ namespace RestaurantAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddRestaurant([FromBody] AddRestaurantRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var restaurantId = await _service.AddNewRestaurant(request);
             return Created($"/api/restaurant/{restaurantId}", restaurantId);
         }
@@ -56,6 +60,10 @@ namespace RestaurantAPI.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRestaurant([FromRoute] int id, [FromBody] UpdateRestaurantRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 await _service.UpdateRestaurant(id, request);
@@ -85,6 +93,10 @@ namespace RestaurantAPI.Controllers
         [HttpPost("{id}/dish")]
         public async Task<IActionResult> AddDish([FromRoute] int id, [FromBody] AddDishRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             await _service.AddNewDish(id, request);
             return NoContent();
         }
@@ -92,6 +104,10 @@ namespace RestaurantAPI.Controllers
         [HttpPut("{restaurantId}/dish/{dishId}")]
         public async Task<IActionResult> UpdateDish([FromRoute] int restaurantId, [FromRoute] int dishId, UpdateDishRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var id = await _service.UpdateDish(restaurantId, dishId, request);
 
             if (id == null)
@@ -113,7 +129,7 @@ namespace RestaurantAPI.Controllers
             {
                 return Problem("We did not find the resource you requested", "Dish", 404);
             }
-            if(id == null)
+            if (id == null)
             {
                 return Problem("We did not find the resource you requested", "Restaurant", 404);
             }

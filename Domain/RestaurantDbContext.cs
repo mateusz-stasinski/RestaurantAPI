@@ -15,9 +15,16 @@ namespace Domain
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<Restaurant>().Property(r => r.Name).HasMaxLength(200).IsRequired();
+            modelBuilder.Entity<Restaurant>().Property(r => r.Name).HasMaxLength(25).IsRequired();
+            modelBuilder.Entity<Restaurant>().Property(r => r.HasDelivery).IsRequired();
 
-            modelBuilder.Entity<Address>().Property(a => a.City).IsRequired();
+            modelBuilder.Entity<Address>().Property(a => a.PostalCode).HasMaxLength(6).IsRequired();
+            modelBuilder.Entity<Address>().Property(a => a.City).HasMaxLength(25).IsRequired();
+            modelBuilder.Entity<Address>().Property(a => a.Street).HasMaxLength(35).IsRequired();
+            modelBuilder.Entity<Address>().Property(a => a.EstateNumber).HasMaxLength(6).IsRequired();
+
+            modelBuilder.Entity<Dish>().Property(d => d.Name).HasMaxLength(25).IsRequired();
+            modelBuilder.Entity<Dish>().Property(d => d.Price).IsRequired();
         }
 
     }

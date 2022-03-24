@@ -39,27 +39,46 @@ namespace RestaurantAPI.Controllers
         public async Task<IActionResult> GetRestaurantWithMenu([FromRoute] int id)
         {
             var restaurant = await _service.GetRestaurantWithDishesById(id);
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
             return Ok(restaurant);
         }
 
         [HttpPost]
         public async Task<IActionResult> AddRestaurant([FromBody] AddRestaurantRequest request)
         {
-            var restaurant = await _service.AddNewRestaurant(request);
-            return Created($"/api/restaurant/{restaurant.Id}", restaurant);
+            var restaurantId = await _service.AddNewRestaurant(request);
+            return Created($"/api/restaurant/{restaurantId}", restaurantId);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRestaurant([FromRoute] int id, [FromBody] UpdateRestaurantRequest request)
         {
-            await _service.UpdateRestaurant(id, request);
+            try
+            {
+                await _service.UpdateRestaurant(id, request);
+            }
+            catch
+            {
+                return Problem("We did not find the resource you requested", "Restaurant", 404);
+            }
+            
             return NoContent();
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRestaurant([FromRoute] int id)
         {
-            await _service.DeleteRestaurant(id);
+            try
+            {
+                await _service.DeleteRestaurant(id);
+            }
+            catch
+            {
+                return Problem("We did not find the resource you requested", "Restaurant", 404);
+            }
             return NoContent();
         }
 
@@ -73,14 +92,31 @@ namespace RestaurantAPI.Controllers
         [HttpPut("{restaurantId}/dish/{dishId}")]
         public async Task<IActionResult> UpdateDish([FromRoute] int restaurantId, [FromRoute] int dishId, UpdateDishRequest request)
         {
-            await _service.UpdateDish(restaurantId, dishId, request);
-            return NoContent();
+            var id = await _service.UpdateDish(restaurantId, dishId, request);
+
+            if (id == null)
+            {
+                return Problem("We did not find the resource you requested", "Restaurant or Dish", 404);
+            }
+            return Created($"api/restaurant/{id}", dishId);
         }
 
         [HttpDelete("{restaurantId}/dish/{dishId}")]
         public async Task<IActionResult> DeleteDish([FromRoute] int restaurantId, [FromRoute] int dishId)
         {
-            await _service.DeleteDish(restaurantId, dishId);
+            int? id;
+            try
+            {
+                id = await _service.DeleteDish(restaurantId, dishId);
+            }
+            catch
+            {
+                return Problem("We did not find the resource you requested", "Dish", 404);
+            }
+            if(id == null)
+            {
+                return Problem("We did not find the resource you requested", "Restaurant", 404);
+            }
             return NoContent();
         }
     }

@@ -112,7 +112,7 @@ namespace Application.Services
             };
             return restaurantDto;
         }
-        public async Task<GetRestaurantResult> AddNewRestaurant(AddRestaurantRequest request)
+        public async Task<int> AddNewRestaurant(AddRestaurantRequest request)
         {
             var restaurant = new Restaurant()
             {
@@ -133,20 +133,7 @@ namespace Application.Services
 
             _context.Restaurants.Add(restaurant);
             await _context.SaveChangesAsync();
-            return (new GetRestaurantResult
-            {
-                Id = restaurant.Id,
-                Name = restaurant.Name,
-                Description = restaurant.Description,
-                Category = restaurant.Description,
-                HasDelivery = restaurant.HasDelivery,
-                ContactEmail = restaurant.ContactEmail,
-                ContactNumber = restaurant.ContactNumber,
-                PostalCode = restaurant.Address.PostalCode,
-                City = restaurant.Address.City,
-                Street = restaurant.Address.Street,
-                EstateNumber = restaurant.Address.EstateNumber
-            });
+            return (restaurant.Id);
         }
 
         public async Task UpdateRestaurant(int id, UpdateRestaurantRequest request)
@@ -190,29 +177,48 @@ namespace Application.Services
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateDish(int restaurantId, int dishId, UpdateDishRequest request)
+        public async Task<int?> UpdateDish(int restaurantId, int dishId, UpdateDishRequest request)
         {
             var restaurant = await _context.Restaurants
                 .Include(r => r.Dishes)
                 .SingleOrDefaultAsync(r => r.Id == restaurantId);
 
+            if (restaurant == null)
+            {
+                return null;
+            }
+
             var dish = restaurant.Dishes.SingleOrDefault(d => d.Id == dishId);
+            if (dish == null) 
+            {
+                return null;
+            }
+
             dish.Name = request.Name;
             dish.Description = request.Description;
             dish.Price = request.Price;
 
             await _context.SaveChangesAsync();
+
+            return restaurant.Id;
         }
 
-        public async Task DeleteDish(int restaurantId, int dishId)
+        public async Task<int?> DeleteDish(int restaurantId, int dishId)
         {
             var restaurant = await _context.Restaurants
                 .Include(r => r.Dishes)
                 .SingleOrDefaultAsync(r => r.Id == restaurantId);
 
+            if(restaurant == null)
+            {
+                return null;
+            }
+
             var dish = restaurant.Dishes.SingleOrDefault(d => d.Id == dishId);
             _context.Remove(dish);
             await _context.SaveChangesAsync();
+
+            return restaurant.Id;
         }
         
     }
